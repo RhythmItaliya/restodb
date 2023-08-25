@@ -1,0 +1,25 @@
+{
+  "name": "restonew",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hotal",
+    "restonew"
+  ],
+  "author": "Rhythm Italiya",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "1.20.1",
+    "express": "^4.18.2",
+    "init": "^0.1.2",
+    "mysql2": "^3.4.5",
+    "sequelize": "^6.32.1",
+    "sequelize-cli": "^6.6.1",
+    "uuid": "^9.0.0"
+  }
+}
