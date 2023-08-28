@@ -29,7 +29,7 @@ app.get('/users/inActive/', async (req, res) => {
       isActive: 0,
     },
   });
-  if (inActiveUsers.length === 0) {
+  if (inActiveUsers == 0) {
     res.send('No inactive users found');
   } else {
     res.send(inActiveUsers);
