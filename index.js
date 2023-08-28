@@ -91,7 +91,7 @@ app.post('/users/login/', async (req, res) => {
     return res.send('UserName or Password is incorrect');
   }
   if (userL.isActive == 0) {
-    return res.send('You account is inactive. Please verify your email to proceed further.');
+    return res.send('You account is inactive.');
   }
   check = bcrypt.compareSync(req.body.password, userL.password);
   if (check) {
