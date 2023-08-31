@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const { users } = require('./models');
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
+const sendMail = require('./untils/mailer');
 const app = express();
 app.use(bodyParser.json());
 
@@ -52,32 +53,84 @@ app.post('/', async (req, res) => {
   }
 });
 
-// send link conformation
-app.get('/', async (req, res) => {
-  userRow = await users.create(req.body);
-  console.log(userRow);
-  res.send('http://localhost:8080/verify/' + userRow.token);
+// Add data in database table
+app.post('/', async (req, res) => {
+  try {
+    c = await users.create(req.body);
+    res.send(c);
+  } catch (e) {
+    console.log(e);
+    let xyz = "";
+    for (let i = 0; i < e.errors.length; i++) {
+      abc = e.errors[i].message.split('.')[1];
+      xyz = xyz + abc + '\n';
+    }
+    res.status(400).send(xyz);
+  }
 });
 
-app.get('/verify/:token', async (req, res) => {
-  let userRow = await users.findOne({
+// send link conformation
+// app.get('/', async (req, res) => {
+//   userRow = await users.create(req.body);
+//   console.log(userRow);
+//   res.send('http://localhost:8080/verify/' + userRow.token);
+// });
+
+// app.get('/verify/:token', async (req, res) => {
+//   let userRow = await users.findOne({
+//     where: {
+//       token: req.params.token
+//     }
+//   });
+//   if (userRow == null) {
+//     return res.send('This link has Expired ');
+//   }
+//   users.update({
+//     token: uuid.v1(), isActive: 1
+//   },
+//     {
+//       where: {
+//         id: userRow.id
+//       }
+//     });
+//   res.send('You are Active');
+// });
+
+app.post('/sendlink', async (req, res) => {
+  try {
+    req.body.password = bcrypt.hashSync(req.body.password, 10);
+    createUser = await users.create(req.body);
+    htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
+    htmlBody += createUser.token;
+    htmlBody += '">Link</a>';
+    sendMail(createUser.emailId, 'Your verify link', htmlBody);
+    res.send("Plse check your account for confirem....");
+  } catch (rm) {
+    abcd = rm.message.split('.')[1];
+    res.send(abcd);
+  }
+});
+
+app.get('/verify-token/:token', async (req, res) => {
+  userV = await users.findOne({
     where: {
       token: req.params.token
     }
   });
-  if (userRow == null) {
-    return res.send('This link has Expired ');
+  if (userV == null) {
+    return res.send('Your link is wrong');
   }
   users.update({
-    token: uuid.v1(), isActive: 1
-  },
-    {
-      where: {
-        id: userRow.id
-      }
-    });
-  res.send('You are Active');
+    token: uuid.v1(),
+    isActive: 1
+  }, {
+    where: {
+      id: userV.id
+    }
+  });
+  res.send('You are verified.');
 });
+
 
 // // user login
 app.post('/users/login/', async (req, res) => {
