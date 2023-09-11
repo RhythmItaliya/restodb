@@ -12,9 +12,6 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        len: [3, 35]
-      }
     },
     uuid: {
       type: DataTypes.UUID,

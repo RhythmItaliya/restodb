@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const { users } = require('./models');
+const { users,menuItems,menuCategories } = require('./models');
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const sendMail = require('./untils/mailer');
@@ -132,7 +132,7 @@ app.get('/verify-token/:token', async (req, res) => {
 });
 
 
-// // user login
+// U S E R L O G I N
 app.post('/users/login/', async (req, res) => {
   let userName = req.body['userName'];
   userL = await users.findOne({
@@ -154,7 +154,7 @@ app.post('/users/login/', async (req, res) => {
   }
 });
 
-// // password reset
+// P A S S W O R D - R E S E T
 app.post('/reset-password/:token', async (req, res) => {
   userP = await users.findOne({
     where: {
@@ -179,5 +179,19 @@ app.post('/reset-password/:token', async (req, res) => {
     res.send('Passwords do not match');
   }
 });
+
+// C A T E G O R I E S
+app.post('/categoties', async (req,res) => {
+  categoR = await menuCategories.create(req.body);
+  res.send(categoR);
+});
+
+// M E N U I T E M S 
+app.post('/itemname', async (req,res) => {
+  itemN = await menuItems.create(req.body);
+  res.send(itemN);
+});
+
+// 
 
 app.listen(8080, () => console.log('conneted...'));
