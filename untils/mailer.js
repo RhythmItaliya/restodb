@@ -12,7 +12,10 @@ const email = nodemailer.createTransport(
 );
 const sendMail = async (to, subject, html) => {
     status2 = await email.sendMail({
-        from: 'info@livefilmnews.com', to: to, subject: subject, html: html,
+        from: 'info@livefilmnews.com',
+        to: to,
+        subject: subject,
+        html: html,
     });
     console.log(status2);
 }

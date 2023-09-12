@@ -15,16 +15,10 @@ module.exports = (sequelize, DataTypes) => {
     userName: {
       allowNull: false,
       type: DataTypes.STRING,
-      validate: {
-        len: [3, 200]
-      }
     },
     password: {
       allowNull: false,
       type: DataTypes.STRING,
-      validate: {
-        len: [8, 200]
-      }
     },
     uuid: {
       type: DataTypes.UUID,

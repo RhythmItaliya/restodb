@@ -1,10 +1,16 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const { users,menuItems,menuCategories } = require('./models');
+const { users, menuItems, menuCategories } = require('./models');
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const sendMail = require('./untils/mailer');
 const app = express();
+const cors = require('cors');
+const { Op } = require('sequelize');
+var corsOptions = {
+  origin: 'http://localhost:5500',
+}
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Reading data from database table
@@ -24,7 +30,7 @@ app.get('/:id', async (req, res) => {
 });
 
 // find inactive users
-app.get('/users/inActive/', async (req, res) => {
+app.get('/users/inActive', async (req, res) => {
   inActiveUsers = await users.findAll({
     where: {
       isActive: 0,
@@ -133,24 +139,28 @@ app.get('/verify-token/:token', async (req, res) => {
 
 
 // U S E R L O G I N
-app.post('/users/login/', async (req, res) => {
-  let userName = req.body['userName'];
-  userL = await users.findOne({
+app.post('/users/login', async (req, res) => {
+  let username = req.body.userName;
+  let userL = await users.findOne({
     where: {
-      userName: userName
+      [Op.or]: {
+        userName: username,
+        emailId: username
+      }
     }
   });
+  console.log(userL);
   if (userL == null) {
-    return res.send('UserName or Password is incorrect');
+    return res.status(401).send('UserName or Password is incorrect');
   }
   if (userL.isActive == 0) {
-    return res.send('You account is inactive.');
+    return res.status(401).send('You account is inactive.');
   }
   check = bcrypt.compareSync(req.body.password, userL.password);
   if (check) {
     return res.send('Login successfully.....');
   } else {
-    return res.send('UserName or Password is incorrect');
+    return res.status(401).send('UserName or Password is incorrect');
   }
 });
 
@@ -181,13 +191,13 @@ app.post('/reset-password/:token', async (req, res) => {
 });
 
 // C A T E G O R I E S
-app.post('/categoties', async (req,res) => {
+app.post('/categoties', async (req, res) => {
   categoR = await menuCategories.create(req.body);
   res.send(categoR);
 });
 
 // M E N U I T E M S 
-app.post('/itemname', async (req,res) => {
+app.post('/itemname', async (req, res) => {
   itemN = await menuItems.create(req.body);
   res.send(itemN);
 });
