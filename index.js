@@ -104,7 +104,6 @@ app.post('/', async (req, res) => {
 
 app.post('/sendlink', async (req, res) => {
   try {
-    req.body.password = bcrypt.hashSync(req.body.password, 10);
     createUser = await users.create(req.body);
     htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
     htmlBody += createUser.token;
@@ -149,14 +148,13 @@ app.post('/users/login', async (req, res) => {
       }
     }
   });
-  console.log(userL);
   if (userL == null) {
-    return res.status(401).send('UserName or Password is incorrect');
+    return res.status(403).send('UserName or Password is incorrect');
   }
   if (userL.isActive == 0) {
-    return res.status(401).send('You account is inactive.');
+    return res.status(403).send('You account is inactive. Please check your email ');
   }
-  check = bcrypt.compareSync(req.body.password, userL.password);
+  let check = bcrypt.compareSync(req.body.password, userL.password);
   if (check) {
     return res.send('Login successfully.....');
   } else {
@@ -202,6 +200,5 @@ app.post('/itemname', async (req, res) => {
   res.send(itemN);
 });
 
-// 
 
 app.listen(8080, () => console.log('conneted...'));
