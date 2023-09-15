@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
         isEmail: true,
       }
     },
+    login: {
+      type: DataTypes.ENUM('Dashboard','Billing','Kitchen'),
+      defaultValue: 'Dashboard',
+    },
   }, {
     sequelize,
     modelName: 'users',

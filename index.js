@@ -7,6 +7,7 @@ const sendMail = require('./untils/mailer');
 const app = express();
 const cors = require('cors');
 const { Op } = require('sequelize');
+const jwt = require('jsonwebtoken');
 var corsOptions = {
   origin: 'http://localhost:5500',
 }
@@ -102,9 +103,36 @@ app.post('/', async (req, res) => {
 //   res.send('You are Active');
 // });
 
-app.post('/sendlink', async (req, res) => {
+
+// app.post('/register', async (req, res) => {
+//   try {
+//     createUser = await users.create(req.body);
+//     htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
+//     htmlBody += createUser.token;
+//     htmlBody += '">Link</a>';
+//     sendMail(createUser.emailId, 'Your verify link', htmlBody);
+//     res.send("Plse check your account for confirem....");
+//   } catch (rm) {
+//     abcd = rm.message.split('.')[1];
+//     res.send(abcd);
+//   }
+// });
+
+app.post('/register', async (req, res) => {
   try {
-    createUser = await users.create(req.body);
+    const { userName, emailId, password, login } = req.body;
+
+    if (!['Dashboard', 'Billing', 'Kitchen'].includes(login)) {
+      return res.send('Invalid role.');
+    }
+
+    const createUser = await users.create({
+      userName: userName,
+      password: password,
+      emailId: emailId,
+      login: login,
+    });
+
     htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
     htmlBody += createUser.token;
     htmlBody += '">Link</a>';
@@ -149,16 +177,22 @@ app.post('/users/login', async (req, res) => {
     }
   });
   if (userL == null) {
-    return res.status(403).send('UserName or Password is incorrect');
+    return res.status(403).send({ "error": "UserName or Password is incorrect" });
   }
   if (userL.isActive == 0) {
     return res.status(403).send('You account is inactive. Please check your email ');
   }
+  
   let check = bcrypt.compareSync(req.body.password, userL.password);
+
   if (check) {
-    return res.send('Login successfully.....');
+    const token = jwt.sign({ "uuid": userL.uuid }, "PARTH=KI=RANI=TULSI");
+
+    const role = userL.login;
+    return res.send({ "X-Access-Token": token, "role": role });
+    
   } else {
-    return res.status(401).send('UserName or Password is incorrect');
+    return res.status(401).send({ "error": "UserName or Password is incorrect" });
   }
 });
 
@@ -199,6 +233,5 @@ app.post('/itemname', async (req, res) => {
   itemN = await menuItems.create(req.body);
   res.send(itemN);
 });
-
 
 app.listen(8080, () => console.log('conneted...'));
