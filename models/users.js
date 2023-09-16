@@ -38,12 +38,12 @@ module.exports = (sequelize, DataTypes) => {
     emailId: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate:{
+      validate: {
         isEmail: true,
       }
     },
-    login: {
-      type: DataTypes.ENUM('Dashboard','Billing','Kitchen'),
+    role: {
+      type: DataTypes.ENUM('dashboardAdmin', 'billAdmin', 'kitchenAdmin', 'orderAdmin'),
       defaultValue: 'Dashboard',
     },
   }, {

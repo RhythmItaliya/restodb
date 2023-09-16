@@ -120,9 +120,9 @@ app.post('/', async (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const { userName, emailId, password, login } = req.body;
+    const { userName, emailId, password, role } = req.body;
 
-    if (!['Dashboard', 'Billing', 'Kitchen'].includes(login)) {
+    if (!['dashboardAdmin', 'billAdmin', 'kitchenAdmin', 'orderAdmin'].includes(role)) {
       return res.send('Invalid role.');
     }
 
@@ -130,8 +130,9 @@ app.post('/register', async (req, res) => {
       userName: userName,
       password: password,
       emailId: emailId,
-      login: login,
+      role: role,
     });
+    console.log(createUser);
 
     htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
     htmlBody += createUser.token;
@@ -164,7 +165,6 @@ app.get('/verify-token/:token', async (req, res) => {
   res.send('You are verified.');
 });
 
-
 // U S E R L O G I N
 app.post('/users/login', async (req, res) => {
   let username = req.body.userName;
@@ -182,19 +182,20 @@ app.post('/users/login', async (req, res) => {
   if (userL.isActive == 0) {
     return res.status(403).send('You account is inactive. Please check your email ');
   }
-  
+
   let check = bcrypt.compareSync(req.body.password, userL.password);
 
   if (check) {
     const token = jwt.sign({ "uuid": userL.uuid }, "PARTH=KI=RANI=TULSI");
 
-    const role = userL.login;
+    const role = userL.role;
     return res.send({ "X-Access-Token": token, "role": role });
-    
+
   } else {
     return res.status(401).send({ "error": "UserName or Password is incorrect" });
   }
 });
+
 
 // P A S S W O R D - R E S E T
 app.post('/reset-password/:token', async (req, res) => {
