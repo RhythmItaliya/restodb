@@ -132,7 +132,6 @@ app.post('/register', async (req, res) => {
       emailId: emailId,
       role: role,
     });
-    console.log(createUser);
 
     htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
     htmlBody += createUser.token;
