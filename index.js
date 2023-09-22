@@ -121,11 +121,12 @@ app.post('/', async (req, res) => {
 app.post('/register', async (req, res) => {
   try {
     const { userName, emailId, password, role } = req.body;
-
+    if (!userName || !emailId || !password || !role) {
+      return res.send('Username, email, password, or role cannot be null.');
+    }
     if (!['dashboardAdmin', 'billAdmin', 'kitchenAdmin', 'orderAdmin'].includes(role)) {
       return res.send('Invalid role.');
     }
-
     const createUser = await users.create({
       userName: userName,
       password: password,
@@ -167,6 +168,7 @@ app.get('/verify-token/:token', async (req, res) => {
 // U S E R L O G I N
 app.post('/users/login', async (req, res) => {
   let username = req.body.userName;
+
   let userL = await users.findOne({
     where: {
       [Op.or]: {
@@ -176,25 +178,27 @@ app.post('/users/login', async (req, res) => {
     }
   });
   if (userL == null) {
-    return res.status(403).send({ "error": "UserName or Password is incorrect" });
+    return res.status(401).send({ "error": "UserName or Password is incorrect" });
   }
   if (userL.isActive == 0) {
-    return res.status(403).send('You account is inactive. Please check your email ');
+    return res.status(403).send({ "error": "Your Account is in-active plse check your Email...." });
   }
-
   let check = bcrypt.compareSync(req.body.password, userL.password);
 
   if (check) {
     const token = jwt.sign({ "uuid": userL.uuid }, "PARTH=KI=RANI=TULSI");
 
     const role = userL.role;
-    return res.send({ "X-Access-Token": token, "role": role });
+    return res.send({
+      "X-Access-Token": token,
+      "role": role,
+      "name": userL.userName,
+    });
 
   } else {
     return res.status(401).send({ "error": "UserName or Password is incorrect" });
   }
 });
-
 
 // P A S S W O R D - R E S E T
 app.post('/reset-password/:token', async (req, res) => {
@@ -224,14 +228,28 @@ app.post('/reset-password/:token', async (req, res) => {
 
 // C A T E G O R I E S
 app.post('/categoties', async (req, res) => {
-  categoR = await menuCategories.create(req.body);
-  res.send(categoR);
+  const { name } = req.body;
+  if (!name) {
+    return res.status(401).send({ "error": "categoties name can not be null" });
+  }
+  const addCategoties = await menuCategories.create({
+    name: name,
+  });
+  res.status(201).send("add categoties successfully....");
 });
 
 // M E N U I T E M S 
 app.post('/itemname', async (req, res) => {
-  itemN = await menuItems.create(req.body);
-  res.send(itemN);
+  const { name, itemPrice, categoryId } = req.body;
+  if (!name || !itemPrice || !categoryId) {
+    return res.status(403).send({ "error": "item name and itemPrice can not be null" });
+  }
+  const addMenuitem = await menuItems.create({
+    name: name,
+    itemPrice: itemPrice,
+    categoryId: categoryId
+  });
+  res.send("add menuItem name successfully....");
 });
 
 app.listen(8080, () => console.log('conneted...'));
