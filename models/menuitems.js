@@ -5,7 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class menuItems extends Model {
     static associate(models) {
-      this.belongsTo(models.menuCategories);
+      this.belongsTo(models.menuCategories, { foreignKey: "categoryId" });
       this.hasMany(models.orderItems);
     }
   }

@@ -226,30 +226,43 @@ app.post('/reset-password/:token', async (req, res) => {
   }
 });
 
+
 // C A T E G O R I E S
-app.post('/categoties', async (req, res) => {
+app.post('/add/categories', (req, res) => {
   const { name } = req.body;
   if (!name) {
-    return res.status(401).send({ "error": "categoties name can not be null" });
+    return res.send('name cannot be null.');
   }
-  const addCategoties = await menuCategories.create({
-    name: name,
+  menuCategories.create({
+    name: name
   });
-  res.status(201).send("add categoties successfully....");
+  res.send({ success: true });
 });
 
-// M E N U I T E M S 
-app.post('/itemname', async (req, res) => {
-  const { name, itemPrice, categoryId } = req.body;
-  if (!name || !itemPrice || !categoryId) {
-    return res.status(403).send({ "error": "item name and itemPrice can not be null" });
+app.get('/all/categories', async (req, res) => {
+  a = await menuCategories.findAll()
+  res.send(a);
+});
+
+
+// M E N U I T E M
+app.post('/add/menuitem', (req, res) => {
+  const { name, categoryId, itemPrice } = req.body;
+
+  if (!name || !categoryId || !itemPrice) {
+    return res.send('name, categoryId, itemPrice cannot be null.');
   }
-  const addMenuitem = await menuItems.create({
+  menuItems.create({
     name: name,
-    itemPrice: itemPrice,
-    categoryId: categoryId
+    categoryId: categoryId,
+    itemPrice: itemPrice
   });
-  res.send("add menuItem name successfully....");
+  res.send({ success: true });
+});
+
+app.get('/all/menuitem', async (req, res) => {
+  a = await menuItems.findAll()
+  res.send(a);
 });
 
 app.listen(8080, () => console.log('conneted...'));
