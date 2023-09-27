@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const { users, menuItems, menuCategories } = require('./models');
+const { users, menuItems, menuCategories, tables } = require('./models');
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const sendMail = require('./untils/mailer');
@@ -264,5 +264,23 @@ app.get('/all/menuitem', async (req, res) => {
   a = await menuItems.findAll()
   res.send(a);
 });
+
+
+// T  A B L E S
+app.post('/new/tables', async (req, res) => {
+  const { table } = req.body;
+  const newTable = await tables.create({
+    table,
+  });
+  res.status(201).json(newTable);
+});
+
+app.get('/all/tables', async (req, res) => {
+  a = await tables.findAll()
+  res.send(a);
+});
+
+// O R E R S
+
 
 app.listen(8080, () => console.log('conneted...'));
