@@ -1,12 +1,12 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const { users, menuItems, menuCategories, tables } = require('./models');
+const { users, menuItems, menuCategories, tables, orders } = require('./models');
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const sendMail = require('./untils/mailer');
 const app = express();
 const cors = require('cors');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const jwt = require('jsonwebtoken');
 var corsOptions = {
   origin: 'http://localhost:5500',
@@ -244,6 +244,33 @@ app.get('/all/categories', async (req, res) => {
   res.send(a);
 });
 
+app.get('/update/:uuid', async (req, res) => {
+  list = await menuCategories.findOne({
+    where: {
+      uuid: req.params.uuid
+    }
+  });
+  return res.send(list);
+});
+
+app.put('/up/menucategories/update/:uuid', async (req, res) => {
+  list = await menuCategories.update(req.body, {
+    where: {
+      uuid: req.params.uuid
+    }
+  });
+  return res.send(list);
+});
+
+app.delete('/up/menucategories/delete/:uuid', async (req, res) => {
+  menuCategories.destroy({
+    where: {
+      uuid: req.params.uuid
+    }
+  });
+  return res.send({ success: true });
+});
+
 
 // M E N U I T E M
 app.post('/add/menuitem', (req, res) => {
@@ -265,6 +292,38 @@ app.get('/all/menuitem', async (req, res) => {
   res.send(a);
 });
 
+app.get('/menuitem/update/:uuid', async (req, res) => {
+  list = await menuItems.findOne({
+    where: {
+      uuid: req.params.uuid
+    }
+  });
+  return res.send(list);
+});
+
+app.put('/up/menuitem/update/:uuid', async (req, res) => {
+  const updatedMenuItem = await menuItems.update(
+    {
+      name: req.body.name,
+      itemPrice: req.body.itemPrice,
+    },
+    {
+      where: {
+        uuid: req.params.uuid,
+      },
+    });
+    return res.send(updatedMenuItem);
+});
+
+
+app.delete('/menuitem/delete/:uuid', async (req, res) => {
+  menuItems.destroy({
+    where: {
+      uuid: req.params.uuid
+    }
+  });
+  return res.send({ success: true });
+})
 
 // T  A B L E S
 app.post('/new/tables', async (req, res) => {
@@ -281,6 +340,41 @@ app.get('/all/tables', async (req, res) => {
 });
 
 // O R E R S
+app.post('/add/orders', async (req, res) => {
+  try {
+    const { items } = req.body;
+    const order = await orders.create({ items });
+    return res.status(201).send(order);
+  } catch (error) {
+    return res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/all/orders', async (req, res) => {
+  const ordersData = await orders.findAll();
+
+  const formattedOrders = ordersData.map(order => {
+    let items;
+    if (typeof order.items === 'string') {
+      items = JSON.parse(order.items);
+    } else {
+      items = order.items;
+    }
+
+    const formattedItems = Object.values(items).map(item => {
+      return {
+        name: item.name,
+        qty: item.qty
+      };
+    });
+
+    return {
+      orderId: order.id,
+      items: formattedItems
+    };
+  });
+  res.send(formattedOrders);
+});
 
 
 app.listen(8080, () => console.log('conneted...'));

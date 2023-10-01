@@ -5,16 +5,16 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class orders extends Model {
     static associate(models) {
-      this.belongsTo(models.customers);
       this.hasMany(models.orderItems);
       this.hasOne(models.bills);
       this.hasOne(models.kitchens);
     }
   }
   orders.init({
-    customerId: {
-      type: DataTypes.INTEGER,
+    items: {
+      type: DataTypes.JSON,
       allowNull: false,
+      defaultValue: []
     },
     uuid: {
       type: DataTypes.UUID,
