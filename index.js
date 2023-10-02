@@ -340,31 +340,19 @@ app.get('/all/tables', async (req, res) => {
 });
 
 app.delete('/up/tables/delete/:uuid', async (req, res) => {
-  try {
-    const deletedTable = await tables.destroy({
-      where: {
-        uuid: req.params.uuid
-      }
-    });
-
-    if (deletedTable === 0) {
-      return res.status(404).json({ success: false, message: 'Table not found' });
+  const deletedTable = await tables.destroy({
+    where: {
+      uuid: req.params.uuid
     }
-
-    return res.status(200).json({ success: true, message: 'Table deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting table:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
-  }
+  });
+  return res.send({ success: true });
 });
-
-
 
 // O R E R S
 app.post('/add/orders', async (req, res) => {
   try {
-    const { items } = req.body;
-    const order = await orders.create({ items });
+    const { items,tableNumber } = req.body;
+    const order = await orders.create({ items,tableNumber });
     return res.status(201).send(order);
   } catch (error) {
     return res.status(500).send({ error: 'Internal Server Error' });
@@ -381,7 +369,6 @@ app.get('/all/orders', async (req, res) => {
     } else {
       items = order.items;
     }
-
     const formattedItems = Object.values(items).map(item => {
       return {
         name: item.name,
@@ -391,11 +378,21 @@ app.get('/all/orders', async (req, res) => {
 
     return {
       orderId: order.id,
+      tableNumber: order.tableNumber,
       items: formattedItems
     };
   });
   res.send(formattedOrders);
 });
 
+
+app.delete('/orders/delete/:uuid', async (req, res) => {
+  const deletedOrders = await orders.destroy({
+    where: {
+      uuid: req.params.uuid,
+    }
+  });
+  res.send({ success: true });
+});
 
 app.listen(8080, () => console.log('conneted...'));
