@@ -132,13 +132,14 @@ app.post('/register', async (req, res) => {
       password: password,
       emailId: emailId,
       role: role,
+      isActive: 1
     });
 
-    htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
-    htmlBody += createUser.token;
-    htmlBody += '">Link</a>';
-    sendMail(createUser.emailId, 'Your verify link', htmlBody);
-    res.send("Plse check your account for confirem....");
+    // htmlBody = '<b> to verify your account : <a href="http://localhost:8080/verify-token/';
+    // htmlBody += createUser.token;
+    // htmlBody += '">Link</a>';
+    // sendMail(createUser.emailId, 'Your verify link', htmlBody);
+    // res.send("Plse check your account for confirem....");
   } catch (rm) {
     abcd = rm.message.split('.')[1];
     res.send(abcd);
@@ -287,6 +288,7 @@ app.post('/add/menuitem', (req, res) => {
   res.send({ success: true });
 });
 
+
 app.get('/all/menuitem', async (req, res) => {
   a = await menuItems.findAll()
   res.send(a);
@@ -348,11 +350,41 @@ app.delete('/up/tables/delete/:uuid', async (req, res) => {
   return res.send({ success: true });
 });
 
+// -----------------------------------------------------
+
+
+// O R E S F O R K I T C H E N
+app.get('/up/in/active/all/orders', async (req, res) => {
+  const activeOrders = await orders.findAll({
+    where: {
+      isActive: 0,
+    },
+  });
+  res.send(activeOrders);
+});
+
+app.put('/orders/markready/:uuid', async (req, res) => {
+  const updatedisactive = await orders.update(
+    {
+      isActive: 1,
+    },
+    {
+      where: {
+        uuid: req.params.uuid,
+      }
+    }
+  );
+  return res.send(updatedisactive);
+});
+
+// -----------------------------------------------------
+
+
 // O R E R S
 app.post('/add/orders', async (req, res) => {
   try {
-    const { items,tableNumber } = req.body;
-    const order = await orders.create({ items,tableNumber });
+    const { items, tableNumber } = req.body;
+    const order = await orders.create({ items, tableNumber });
     return res.status(201).send(order);
   } catch (error) {
     return res.status(500).send({ error: 'Internal Server Error' });
@@ -375,11 +407,12 @@ app.get('/all/orders', async (req, res) => {
         qty: item.qty
       };
     });
-
     return {
       orderId: order.id,
       tableNumber: order.tableNumber,
-      items: formattedItems
+      items: formattedItems,
+      uuid: order.uuid,
+      isActive:order.isActive,
     };
   });
   res.send(formattedOrders);
@@ -387,12 +420,12 @@ app.get('/all/orders', async (req, res) => {
 
 
 app.delete('/orders/delete/:uuid', async (req, res) => {
-  const deletedOrders = await orders.destroy({
+  orders.destroy({
     where: {
-      uuid: req.params.uuid,
+      uuid: req.params.uuid
     }
   });
-  res.send({ success: true });
+  return res.send({ success: true });
 });
 
 app.listen(8080, () => console.log('conneted...'));

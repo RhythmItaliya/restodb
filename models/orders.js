@@ -24,6 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     tableNumber: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: 0,
+      allowNull: false,
     }
   }, {
     sequelize,
