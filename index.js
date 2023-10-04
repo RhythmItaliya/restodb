@@ -354,14 +354,6 @@ app.delete('/up/tables/delete/:uuid', async (req, res) => {
 
 
 // O R E S F O R K I T C H E N
-app.get('/up/in/active/all/orders', async (req, res) => {
-  const activeOrders = await orders.findAll({
-    where: {
-      isActive: 0,
-    },
-  });
-  res.send(activeOrders);
-});
 
 app.put('/orders/markready/:uuid', async (req, res) => {
   const updatedisactive = await orders.update(
